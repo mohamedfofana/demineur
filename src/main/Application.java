@@ -12,8 +12,8 @@ public class Application extends JFrame{
         // add objects to the panel
     		add(new Board());
         
-        setSize(350, 450);
-        setResizable(false);
+        setSize(350, 600);
+        setResizable(true);
         setTitle("Demineur");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
