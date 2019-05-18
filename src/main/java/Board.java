@@ -1,25 +1,28 @@
-package main;
-import java.awt.Color;
+package main.java;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class Board extends JPanel {
-	int nbBombs=15;
-	int nbMine = 9;
-	int cols = 7;
-	int rows = 13;
-	int bombPosed = 0;
-	int flagPosed = 0;
-	int bombFreeCase = 0;
+	private final int nbBombs=15;
+	private final int cols = 7;
+	private final int rows = 13;
+	private int bombPosed = 0;
+	private int flagPosed = 0;
+	private int bombFreeCase = 0;
+	private final ImageIcon LOOSE_ICON = new ImageIcon("resources/images/loose.jpg");
+	private final ImageIcon WIN_ICON = new ImageIcon("resources/images/win.jpg");
+	private final Icon MINE_ICON = new ImageIcon("resources/images/mine.jpg");
 	Ground[][] map = new Ground[rows][cols];
 	
 	public Board() {
+		long startTime = System.nanoTime();
 		setLayout(new GridLayout(rows, cols));
 		for(int i=0;i<rows;i++) {
 			for(int j=0;j<cols;j++) {
@@ -34,11 +37,22 @@ public class Board extends JPanel {
 				map[i][j]=gr;
 			}
 		}
+		long endTime = System.nanoTime();
+		long duration = (endTime - startTime)/1000000;  //divide by 1000000 to get milliseconds.
+		System.out.println("Durée init map : " + duration + "ms");
+		startTime = System.nanoTime();
 		putBombs();
+		endTime = System.nanoTime();
+		duration = (endTime - startTime)/1000000;  //divide by 1000000 to get milliseconds.
+		System.out.println("Durée putBombs : " + duration + "ms");
+		startTime = System.nanoTime();
 		setNbBombsNear();
+		endTime = System.nanoTime();
+		duration = (endTime - startTime)/1000000;  //divide by 1000000 to get milliseconds.
+		System.out.println("Durée setNbBombsNear : " + duration + "ms");
 	}
 	
-	public void putBombs() {
+	private void putBombs() {
 		int compt= 0; 
 		int i = 0;
 		while (i < nbBombs)
@@ -50,8 +64,6 @@ public class Board extends JPanel {
 				if (!map[x][y].hasBomb())
 				{
 					map[x][y].setBomb(true);
-					map[x][y].setBackground(Color.RED);
-					map[x][y].setOpaque(true);
 					compt++;
 					i++;
 				}
@@ -79,12 +91,10 @@ public class Board extends JPanel {
 	}
 	
 	private void checkIfButtonHasBomb(Ground currentGround){
-		// On teste la reussite du cast avant de proceder a un quelconque acces dessus !
-		if(currentGround != null) //emetteurCasted vaut 0 si le cast a echoue
+		if(currentGround != null)
 		{			
 			if (currentGround.hasBomb()){
 				gameOver(true);
-				System.out.println("Game Over !");
 			}
 			else{
 				if (currentGround.hasBombNear())
@@ -96,7 +106,7 @@ public class Board extends JPanel {
 				currentGround.setEnabled(false);
 				bombFreeCase += 1;
 			}
-			if (doIWin()){
+			if (gameWon()){
 				gameOver(false);
 			}
 		}
@@ -104,7 +114,7 @@ public class Board extends JPanel {
 	
 	/**
 	 * Pour chaque case autour faire
-	 * 	Si la ces ne contient pas de bombe et n'a pas une bombe dans ses contour
+	 * 	Si la case ne contient pas de bombe et n'a pas une bombe autour
 	 * clearAround(i,j) // fonction récursif 
 	 * 
 	 * 
@@ -135,27 +145,13 @@ public class Board extends JPanel {
 			clearAroundRecur(i-1, j-1);
 			clearAroundRecur(i-1, j);
 			clearAroundRecur(i-1, j+1);
-			
 			clearAroundRecur(i, j+1);
 			clearAroundRecur(i, j-1);
 			
 		}
 	}
-	/*
-	private void clearAround(int i, int j){
-		for(int k = -1; k < 2; k++)
-			for(int l = -1; l <2; l++)
-				if (i+k>=0 && i+k < rows)
-					if(j+l>=0 && j+l < cols)
-						if (!map[i+k][j+l].hasBomb())
-						{
-							if (map[i+k][j+l].hasBombNear())
-								map[i+k][j+l].setText(""+map[i+k][j+l].getNbBombNear());
-							map[i+k][j+l].setEnabled(false);
-						} 
-	}
-	*/
-	private boolean doIWin(){
+
+	private boolean gameWon(){
 		int compt = 0;
 		for(int i = 0; i < rows; i++) {
 			for(int j = 0; j < cols; j++){
@@ -176,24 +172,22 @@ public class Board extends JPanel {
 	 **/
 	private void gameOver(boolean lost)
 	{
-		if (lost)
-		{
-			System.out.println("Perdu !!");
+		JOptionPane jop1 = new JOptionPane();
+		ImageIcon img;
+		if (lost){
+			jop1.showMessageDialog(null, null, "Perdu !!!", 1, LOOSE_ICON);
 		}
-		else
-		{
-			System.out.println("Gagné !");
+		else{
+			jop1.showMessageDialog(null, null, "Gagné !!!", 1,WIN_ICON);
 		}
 		int compt;
 		compt = 0;
 		int mapX[] = new int[100];
 		int mapY[] = new int[100];
-		Icon warnIcon = new ImageIcon("images/mine.jpg");
 		for(int i = 0; i < rows; i++)
 			for(int j = 0; j < cols; j++){
-				//map[i][j].setStyle("icon",null);
 				if (map[i][j].hasBomb()){
-					map[i][j].setIcon(warnIcon);
+					map[i][j].setIcon(MINE_ICON);
 					mapX[compt] = i;
 					mapY[compt] = j;
 					compt++;
