@@ -1,7 +1,7 @@
 package main.java;
 
-import javax.swing.JOptionPane;
-
 public class Utils {
-	public static JOptionPane jop1 = new JOptionPane();
+	public static int randInt(int min, int max){
+		return (int) Math.floor(Math.random() * (max + 1 - min)); 
+	}
 }
